@@ -219,7 +219,8 @@ namespace NareisLib
 
 
 
-
+        //xml里无需设定并且设定无效
+        public PawnRenderNode node = null;
         //xml里无需设定并且设定无效
         public MultiTexBatch cachedBatch = null;
         //xml里无需设定并且设定无效
@@ -242,6 +243,9 @@ namespace NareisLib
 
         //xml里无需设定并且设定无效
         public string hediffPrefix = "";
+
+        //xml里无需设定并且设定无效
+        public bool hediffEnableWithJob = false;
 
         //xml里无需设定并且设定无效
         public string jobPrefix = "";
@@ -356,7 +360,7 @@ namespace NareisLib
             result.side = side;
 
 
-
+            result.node = node;
             result.cachedBatch = cachedBatch;
             result.cacheGraphic = cacheGraphic;
             result.cachedApparel = cachedApparel;
@@ -552,11 +556,12 @@ namespace NareisLib
             hediffPrefix = "";
             foreach (TextureLevelHediffSet set in hediffSets)
             {
-                if (!set.texList.Contains(keyName) || ((exPath != "" || jobPrefix != "") && !set.enableWithJob))
+                if (!set.texList.Contains(keyName))
                     continue;
                 if (set.priority >= priority && set.GetCurHediffPrefix(pawn, bodyPart, bodyPartLabel, ref hediffPrefix))
                 {
                     priority = set.priority;
+                    hediffEnableWithJob = set.enableWithJob;
                 }
             }
             if (hediffPrefix == "")
@@ -629,16 +634,22 @@ namespace NareisLib
                 headType = "_" + headType;
             if (condition != "")
                 condition = "_" + condition;
-            string result = new StringBuilder().Append(new string[] {jobPrefix, hediffPrefix, keyName, genderSuffix, bodyType, headType, condition }.SelectMany(x => x).ToArray()).ToString();
+            string result = new StringBuilder().Append(new string[] {jobPrefix, keyName, genderSuffix, bodyType, headType, condition }.SelectMany(x => x).ToArray()).ToString();
             return result;
         }
 
         //取得graphic，修改了基类的属性Graphic，参数为完全处理完毕后多层渲染comp里记录的keyName（列表在MultiTexBatch里）
         public Graphic GetGraphic(string keyName, Color color, Color colorTwo, string condition = "", string bodyType = "", string headType = "")
         {
-            string path = (exPath == "" || exPath == null) 
-                ? Path.Combine(folder, subFolderPath , GetFullKeyName(keyName, condition, bodyType, headType)) 
-                : Path.Combine(exPath, GetFullKeyName(keyName, condition, bodyType, headType));
+            string path = (exPath == "" || exPath == null)
+                ? ((hediffPrefix == "" || hediffPrefix == null)
+                   ? Path.Combine(folder, subFolderPath, GetFullKeyName(keyName, condition, bodyType, headType))
+                   : Path.Combine(folder, subFolderPath, hediffPrefix, GetFullKeyName(keyName, condition, bodyType, headType)))
+                : ((hediffPrefix == "" || hediffPrefix == null)
+                   ? Path.Combine(exPath, GetFullKeyName(keyName, condition, bodyType, headType))
+                   : (hediffEnableWithJob
+                      ? Path.Combine(exPath, hediffPrefix, GetFullKeyName(keyName, condition, bodyType, headType))
+                      : Path.Combine(folder, subFolderPath, hediffPrefix, GetFullKeyName(keyName, condition, bodyType, headType))));
             if (texPath != path || cacheGraphic == null)
             {
                 texPath = path;
@@ -661,6 +672,7 @@ namespace NareisLib
                 renderComp,
                 cachedApparel
             });
+            result.textureLevels.node = result;
             result.textureLevels.actionManager.node = result;
             return result;
         }

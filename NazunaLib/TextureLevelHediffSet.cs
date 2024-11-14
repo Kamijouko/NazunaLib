@@ -17,7 +17,7 @@ namespace NareisLib
         //填入Hediff的hediffClass，请不要与上方参数同时使用
         public Type hediffClass;
 
-        //控制此Hediff效果是否在Job效果存在时渲染，
+        //控制此Hediff效果是否有对应Job时的效果
         //如果开启的话必须为当前的Job效果也准备一份Hediff效果贴图
         public bool enableWithJob = false;
 
@@ -60,24 +60,27 @@ namespace NareisLib
                     return true;
                 }
             }
-            if (useSeverity)
+            if (hediff != null)
             {
-                float tmp = 0f;
-                float maxSeverityOfHediff = pawn.SeverityOfHediffsOnPart(hediff, part, partLabel).Max();
-                foreach (TextureLevelHediffSeveritySet set in severity)
+                if (useSeverity)
                 {
-                    if (maxSeverityOfHediff >= set.severity && set.severity >= tmp)
+                    float tmp = 0f;
+                    float maxSeverityOfHediff = pawn.SeverityOfHediffsOnPart(hediff, part, partLabel).Max();
+                    foreach (TextureLevelHediffSeveritySet set in severity)
                     {
-                        tmp = set.severity;
-                        prefix = set.prefix;
-                        return true;
+                        if (maxSeverityOfHediff >= set.severity && set.severity >= tmp)
+                        {
+                            tmp = set.severity;
+                            prefix = set.prefix;
+                            return true;
+                        }
                     }
                 }
-            }
-            else if (pawn.HasHediffOfDefAndPart(hediff, part, partLabel) != null)
-            {
-                prefix = noSeverityPrefix;
-                return true;
+                else if (pawn.HasHediffOfDefAndPart(hediff, part, partLabel) != null)
+                {
+                    prefix = noSeverityPrefix;
+                    return true;
+                }
             }
             return false;
         }
@@ -92,7 +95,9 @@ namespace NareisLib
 
         private bool HasHediffOfClassAndPart(ExtendedGraphicsPawnWrapper pawn, Type hediffClass, BodyPartDef part, string partLabel)
         {
-            return pawn.GetHediffList().Any((Hediff h) => IsHediffOfClassAndPart(pawn, h, hediffClass, part, partLabel));
+            bool result = pawn.GetHediffList().Any((Hediff h) => IsHediffOfClassAndPart(pawn, h, hediffClass, part, partLabel));
+            //Log.Message(result.ToString());
+            return result;
         }
 
         private bool IsHediffOfClassAndPart(ExtendedGraphicsPawnWrapper pawn, Hediff hediff, Type hediffClass, BodyPartDef part, string partLabel)

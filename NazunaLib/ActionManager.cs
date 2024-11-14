@@ -186,8 +186,12 @@ namespace NareisLib
                     }
                 }
                 else
+                {
                     fullPath = "";
-                GlobalTextureAtlasManager.TryMarkPawnFrameSetDirty(obj);
+                    GlobalTextureAtlasManager.TryMarkPawnFrameSetDirty(obj);
+                    if (node != null)
+                        node.requestRecache = true;
+                }
             }
         }
 
