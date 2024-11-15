@@ -102,7 +102,7 @@ namespace NareisLib
 
         private bool IsHediffOfClassAndPart(ExtendedGraphicsPawnWrapper pawn, Hediff hediff, Type hediffClass, BodyPartDef part, string partLabel)
         {
-            return hediff.GetType() == hediffClass && (hediff.Part == null || pawn.IsBodyPart(hediff.Part, part, partLabel));
+            return hediff.def.hediffClass == hediffClass && ((hediff.Part == null && hediff.Part.untranslatedCustomLabel == partLabel) || pawn.IsBodyPart(hediff.Part, part, partLabel));
         }
     }
 }

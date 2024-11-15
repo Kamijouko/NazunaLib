@@ -626,8 +626,6 @@ namespace NareisLib
                 patternPrefix = "Pattern" + pattern.ToString() + "_";*/
             if (jobPrefix != "")
                 jobPrefix = jobPrefix + "_";
-            if (hediffPrefix != "")
-                hediffPrefix = hediffPrefix + "_";
             if (bodyType != "" && headType == "")
                 bodyType = "_" + bodyType;
             if (headType != "" && bodyType == "")
